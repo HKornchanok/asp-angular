@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Backend.Data;
@@ -108,6 +109,7 @@ public class ItemController : ControllerBase
     }
 
     [HttpPost]
+    [EnableRateLimiting("strict")]
     public async Task<ActionResult<Item>> CreateItem(CreateItemDto dto)
     {
         if (string.IsNullOrEmpty(dto.SerialNumber))
@@ -147,6 +149,7 @@ public class ItemController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [EnableRateLimiting("strict")]
     public async Task<IActionResult> DeleteItem(int id)
     {
         var item = await _context.Items.FindAsync(id);
