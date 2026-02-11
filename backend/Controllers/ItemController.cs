@@ -121,9 +121,9 @@ public class ItemController : ControllerBase
             return BadRequest(new { message = "Serial number is required" });
         }
 
-        if (dto.SerialNumber.Length != 18)
+        if (dto.SerialNumber.Length != 16)
         {
-            return BadRequest(new { message = "Serial number must be exactly 18 characters" });
+            return BadRequest(new { message = "Serial number must be exactly 16 characters" });
         }
 
         if (!System.Text.RegularExpressions.Regex.IsMatch(dto.SerialNumber, @"^[A-Z0-9]+$"))

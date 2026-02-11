@@ -1,0 +1,31 @@
+{
+  "APP_TITLE": "IT 06-01",
+  "INPUT_PLACEHOLDER": "XXXX-XXXX-XXXX-XXXX",
+  "VALIDATION": {
+    "REQUIRED": "กรุณากรอกหมายเลขซีเรียล",
+    "MAX_LENGTH": "ต้องไม่เกิน 16 ตัวอักษร",
+    "PATTERN": "อนุญาตเฉพาะตัวอักษรพิมพ์ใหญ่ (A-Z) และตัวเลข (0-9)"
+  },
+  "BUTTON": {
+    "ADD_ITEM": "ADD",
+    "DELETE": "ลบ",
+    "CANCEL": "ยกเลิก"
+  },
+  "TOAST": {
+    "ITEM_ADDED": "เพิ่มรายการสำเร็จ",
+    "ADD_FAILED": "เพิ่มรายการไม่สำเร็จ",
+    "ITEM_DELETED": "ลบรายการสำเร็จ",
+    "DELETE_FAILED": "ลบรายการไม่สำเร็จ"
+  },
+  "DIALOG": {
+    "CONFIRM_DELETE": "ยืนยันการลบ",
+    "DELETE_MESSAGE": "คุณต้องการลบข้อมูล รหัสสินค้า \"{{serialNumber}}\" หรือไม่?"
+  },
+  "COLUMN": {
+    "ID": "Id",
+    "SERIAL_NUMBER": "รหัสสินค้า(16 หลัก)",
+    "BARCODE": "บาร์โค้ดสินค้า",
+    "ACTION": "Action",
+    "CREATED_AT": "วันที่สร้าง"
+  }
+}

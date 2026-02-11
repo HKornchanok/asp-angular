@@ -1,0 +1,31 @@
+{
+  "APP_TITLE": "IT 06-01",
+  "INPUT_PLACEHOLDER": "XXXX-XXXX-XXXX-XXXX",
+  "VALIDATION": {
+    "REQUIRED": "Serial number is required",
+    "MAX_LENGTH": "Maximum 16 characters allowed",
+    "PATTERN": "Only uppercase letters (A-Z) and numbers (0-9) allowed"
+  },
+  "BUTTON": {
+    "ADD_ITEM": "ADD",
+    "DELETE": "DELETE",
+    "CANCEL": "CANCEL"
+  },
+  "TOAST": {
+    "ITEM_ADDED": "Item added successfully",
+    "ADD_FAILED": "Failed to add item",
+    "ITEM_DELETED": "Item deleted successfully",
+    "DELETE_FAILED": "Failed to delete item"
+  },
+  "DIALOG": {
+    "CONFIRM_DELETE": "Confirm Delete",
+    "DELETE_MESSAGE": "Are you sure you want to delete item \"{{serialNumber}}\"?"
+  },
+  "COLUMN": {
+    "ID": "ID",
+    "SERIAL_NUMBER": "Serial Number (16 characters)",
+    "BARCODE": "Barcode (Code39)",
+    "ACTION": "Action",
+    "CREATED_AT": "Created At"
+  }
+}

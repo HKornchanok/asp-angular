@@ -1,7 +1,11 @@
 <app-toast-container></app-toast-container>
 
 <header class="top-bar">
-  <h1>TCC Beverage - Item Management</h1>
+  <h1>{{ 'APP_TITLE' | translate }}</h1>
+  <div class="lang-switcher">
+    <button [class.active]="currentLang === 'en'" (click)="switchLang('en')">EN</button>
+    <button [class.active]="currentLang === 'th'" (click)="switchLang('th')">TH</button>
+  </div>
 </header>
 
 <div class="container">
@@ -10,19 +14,19 @@
       <input
         type="text"
         [formControl]="serialNumberControl"
-        placeholder="Enter Serial Number (A-Z, 0-9)"
-        maxlength="18"
+        [placeholder]="'INPUT_PLACEHOLDER' | translate"
+        maxlength="16"
         (keyup.enter)="addItem()"
         [disabled]="isAddingItem"
       />
       @if (serialNumberControl.touched && serialNumberControl.invalid) {
         <span class="error-message">
           @if (serialNumberControl.errors?.['required']) {
-            Serial number is required
+            {{ 'VALIDATION.REQUIRED' | translate }}
           } @else if (serialNumberControl.errors?.['maxlength']) {
-            Maximum 18 characters allowed
+            {{ 'VALIDATION.MAX_LENGTH' | translate }}
           } @else if (serialNumberControl.errors?.['pattern']) {
-            Only uppercase letters (A-Z) and numbers (0-9) allowed
+            {{ 'VALIDATION.PATTERN' | translate }}
           }
         </span>
       }
@@ -31,7 +35,7 @@
       @if (isAddingItem) {
         <app-spinner [size]="SpinnerSize.Small"></app-spinner>
       } @else {
-        Add Item
+        {{ 'BUTTON.ADD_ITEM' | translate }}
       }
     </button>
   </div>
@@ -54,9 +58,10 @@
 
 <app-confirm-dialog
   [visible]="deleteDialogVisible"
-  title="Confirm Delete"
+  [title]="'DIALOG.CONFIRM_DELETE' | translate"
   [message]="deleteDialogMessage"
-  confirmText="Delete"
+  [confirmText]="'BUTTON.DELETE' | translate"
+  [cancelText]="'BUTTON.CANCEL' | translate"
   (confirmed)="onDeleteConfirmed()"
   (cancelled)="closeDeleteDialog()"
 >

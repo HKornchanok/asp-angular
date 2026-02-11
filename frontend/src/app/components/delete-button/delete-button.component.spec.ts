@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TranslateModule } from '@ngx-translate/core';
 import { DeleteButtonComponent } from './delete-button.component';
 import { ICellRendererParams } from 'ag-grid-community';
 
@@ -8,7 +9,7 @@ describe('DeleteButtonComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DeleteButtonComponent],
+      imports: [DeleteButtonComponent, TranslateModule.forRoot()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(DeleteButtonComponent);
@@ -19,7 +20,7 @@ describe('DeleteButtonComponent', () => {
   it('should create and render button', () => {
     expect(component).toBeTruthy();
     const button = fixture.nativeElement.querySelector('.delete-btn');
-    expect(button.textContent).toContain('Delete');
+    expect(button.textContent).toContain('BUTTON.DELETE');
   });
 
   it('should return false on refresh', () => {

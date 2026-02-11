@@ -13,9 +13,10 @@ import {
   SortModelItem,
 } from 'ag-grid-community';
 import { Subscription } from 'rxjs';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ItemService, GetItemsRequest } from './services/item.service';
 import { NotificationService } from './services/notification.service';
-import { columnDefs } from './columnDefs';
+import { getColumnDefs } from './columnDefs';
 import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
 import { ToastContainerComponent } from './components/toast-container/toast-container.component';
 import { SpinnerComponent, SpinnerSize } from './components/spinner/spinner.component';
@@ -28,6 +29,7 @@ ModuleRegistry.registerModules([AllCommunityModule]);
   imports: [
     ReactiveFormsModule,
     AgGridModule,
+    TranslateModule,
     ConfirmDialogComponent,
     ToastContainerComponent,
     SpinnerComponent,
@@ -38,15 +40,17 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 export class App implements OnInit, OnDestroy {
   private itemService = inject(ItemService);
   private notificationService = inject(NotificationService);
+  private translate = inject(TranslateService);
   private gridApi!: GridApi;
   private refreshSubscription?: Subscription;
+  private langSubscription?: Subscription;
 
   public SpinnerSize = SpinnerSize;
 
   public serialNumberControl = new FormControl('', [
     Validators.required,
-    Validators.maxLength(18),
-    Validators.minLength(18),
+    Validators.maxLength(16),
+    Validators.minLength(16),
     Validators.pattern(/^[A-Z0-9]+$/),
   ]);
 
@@ -56,7 +60,7 @@ export class App implements OnInit, OnDestroy {
   public deleteDialogMessage = '';
   private pendingDeleteId: number | null = null;
 
-  public columnDefs: ColDef[] = columnDefs;
+  public columnDefs: ColDef[] = getColumnDefs(this.translate);
 
   public gridContext = {
     onDelete: (id: number, serialNumber: string) => this.showDeleteDialog(id, serialNumber),
@@ -71,7 +75,11 @@ export class App implements OnInit, OnDestroy {
   public infiniteInitialRowCount = 1;
   public maxBlocksInCache = 100;
 
+  public currentLang = 'th';
+
   ngOnInit(): void {
+    this.translate.use(this.currentLang);
+
     this.serialNumberControl.valueChanges.subscribe((value) => {
       if (value) {
         const upperValue = value.toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -86,10 +94,20 @@ export class App implements OnInit, OnDestroy {
         this.gridApi.refreshInfiniteCache();
       }
     });
+
+    this.langSubscription = this.translate.onLangChange.subscribe(() => {
+      this.columnDefs = getColumnDefs(this.translate);
+    });
   }
 
   ngOnDestroy(): void {
     this.refreshSubscription?.unsubscribe();
+    this.langSubscription?.unsubscribe();
+  }
+
+  public switchLang(lang: string): void {
+    this.currentLang = lang;
+    this.translate.use(lang);
   }
 
   public onGridReady(params: GridReadyEvent): void {
@@ -166,11 +184,11 @@ export class App implements OnInit, OnDestroy {
       next: () => {
         this.serialNumberControl.setValue('');
         this.serialNumberControl.markAsUntouched();
-        this.notificationService.success('Item added successfully');
+        this.notificationService.success(this.translate.instant('TOAST.ITEM_ADDED'));
         this.isAddingItem = false;
       },
       error: (err) => {
-        let message = 'Failed to add item';
+        let message = this.translate.instant('TOAST.ADD_FAILED');
         try {
           const parsed = JSON.parse(err?.response);
           message = parsed?.message || message;
@@ -185,7 +203,7 @@ export class App implements OnInit, OnDestroy {
 
   public showDeleteDialog(id: number, serialNumber: string): void {
     this.pendingDeleteId = id;
-    this.deleteDialogMessage = `Are you sure you want to delete item "${serialNumber}"?`;
+    this.deleteDialogMessage = this.translate.instant('DIALOG.DELETE_MESSAGE', { serialNumber });
     this.deleteDialogVisible = true;
   }
 
@@ -193,10 +211,10 @@ export class App implements OnInit, OnDestroy {
     if (this.pendingDeleteId !== null) {
       this.itemService.deleteItem(this.pendingDeleteId).subscribe({
         next: () => {
-          this.notificationService.success('Item deleted successfully');
+          this.notificationService.success(this.translate.instant('TOAST.ITEM_DELETED'));
         },
         error: () => {
-          this.notificationService.error('Failed to delete item');
+          this.notificationService.error(this.translate.instant('TOAST.DELETE_FAILED'));
         },
       });
     }

@@ -14,7 +14,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
             <p>{{ message }}</p>
           </div>
           <div class="dialog-footer">
-            <button class="btn-cancel" (click)="onCancel()">Cancel</button>
+            <button class="btn-cancel" (click)="onCancel()">{{ cancelText }}</button>
             <button class="btn-confirm" (click)="onConfirm()">{{ confirmText }}</button>
           </div>
         </div>
@@ -40,14 +40,12 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
         background: var(--color-white);
         border-radius: 8px;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        min-width: 350px;
-        max-width: 450px;
+        min-width: 450px;
+        max-width: 600px;
       }
 
       .dialog-header {
         padding: 16px 20px;
-        border-bottom: 1px solid var(--color-border-light);
-
         h3 {
           margin: 0;
           font-size: 18px;
@@ -62,12 +60,12 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
           margin: 0;
           color: var(--color-text-muted);
           line-height: 1.5;
+          font-size: 14px;
         }
       }
 
       .dialog-footer {
         padding: 12px 20px;
-        border-top: 1px solid var(--color-border-light);
         display: flex;
         justify-content: flex-end;
         gap: 10px;
@@ -107,6 +105,7 @@ export class ConfirmDialogComponent {
   @Input() title = 'Confirm';
   @Input() message = 'Are you sure?';
   @Input() confirmText = 'Delete';
+  @Input() cancelText = 'Cancel';
 
   @Output() confirmed = new EventEmitter<void>();
   @Output() cancelled = new EventEmitter<void>();

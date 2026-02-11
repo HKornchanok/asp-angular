@@ -1,11 +1,15 @@
 import { Component } from '@angular/core';
 import { ICellRendererAngularComp } from 'ag-grid-angular';
 import { ICellRendererParams } from 'ag-grid-community';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-delete-button',
   standalone: true,
-  template: ` <button class="delete-btn" (click)="onClick()">Delete</button> `,
+  imports: [TranslateModule],
+  template: `
+    <button class="delete-btn" (click)="onClick()">{{ 'BUTTON.DELETE' | translate }}</button>
+  `,
   styles: [
     `
       .delete-btn {
