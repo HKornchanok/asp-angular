@@ -22,6 +22,10 @@ public class AppDbContext : DbContext
             entity.Property(e => e.SerialNumber).IsRequired().HasMaxLength(100);
             entity.Property(e => e.Barcode).IsRequired().HasMaxLength(100);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+            entity.HasIndex(e => e.SerialNumber).IsUnique();
+            entity.HasIndex(e => e.Barcode);
+            entity.HasIndex(e => e.CreatedAt);
         });
     }
 }
