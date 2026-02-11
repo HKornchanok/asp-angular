@@ -120,6 +120,11 @@
             ],
             "styles": [
               "src/styles.scss"
+            ],
+            "codeCoverageExclude": [
+              "src/app/services/api-client.generated.ts",
+              "src/environments/**",
+              "src/main.ts"
             ]
           }
         }

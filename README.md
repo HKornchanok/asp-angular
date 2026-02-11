@@ -63,3 +63,18 @@ Runs at http://localhost:4200
 | DELETE | `/api/item/{id}` | Delete item |
 
 Swagger UI: http://localhost:5000/swagger
+
+## Testing
+
+### Frontend
+```bash
+cd frontend
+npm test                 # Run tests in watch mode
+npm run test:ci          # Run tests headless (CI)
+npm run test:coverage    # Run tests with coverage report
+```
+
+### Backend
+```bash
+dotnet test backend.Tests
+```
