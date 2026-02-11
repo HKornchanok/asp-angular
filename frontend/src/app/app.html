@@ -1,0 +1,57 @@
+<div class="container">
+  <h1>TCC Beverage - Item Management</h1>
+
+  <div class="input-section">
+    <div class="input-wrapper">
+      <input
+        type="text"
+        [formControl]="serialNumberControl"
+        [class.has-error]="addError"
+        placeholder="Enter Serial Number (A-Z, 0-9)"
+        maxlength="18"
+        (keyup.enter)="addItem()"
+        (input)="clearError()"
+      />
+      @if (serialNumberControl.touched && serialNumberControl.invalid) {
+        <span class="error-message">
+          @if (serialNumberControl.errors?.['required']) {
+            Serial number is required
+          } @else if (serialNumberControl.errors?.['maxlength']) {
+            Maximum 18 characters allowed
+          } @else if (serialNumberControl.errors?.['pattern']) {
+            Only uppercase letters (A-Z) and numbers (0-9) allowed
+          }
+        </span>
+      }
+      @if (addError) {
+        <span class="error-message api-error">{{ addError }}</span>
+      }
+    </div>
+    <button (click)="addItem()" [disabled]="serialNumberControl.invalid">Add Item</button>
+  </div>
+
+  <ag-grid-angular
+    [theme]="theme"
+    [columnDefs]="columnDefs"
+    [context]="gridContext"
+    [rowModelType]="rowModelType"
+    [cacheBlockSize]="cacheBlockSize"
+    [cacheOverflowSize]="cacheOverflowSize"
+    [maxConcurrentDatasourceRequests]="maxConcurrentDatasourceRequests"
+    [infiniteInitialRowCount]="infiniteInitialRowCount"
+    [maxBlocksInCache]="maxBlocksInCache"
+    (gridReady)="onGridReady($event)"
+    style="width: 100%; height: 500px"
+  >
+  </ag-grid-angular>
+</div>
+
+<app-confirm-dialog
+  [visible]="deleteDialogVisible"
+  title="Confirm Delete"
+  [message]="deleteDialogMessage"
+  confirmText="Delete"
+  (confirmed)="onDeleteConfirmed()"
+  (cancelled)="closeDeleteDialog()"
+>
+</app-confirm-dialog>

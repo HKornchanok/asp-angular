@@ -1,0 +1,45 @@
+# Frontend (Angular/Node)
+frontend/node_modules/
+frontend/dist/
+frontend/tmp/
+frontend/out-tsc/
+frontend/.angular/cache/
+frontend/.sass-cache/
+frontend/coverage/
+frontend/npm-debug.log
+frontend/yarn-error.log
+
+# Backend (.NET)
+backend/bin/
+backend/obj/
+backend/*.user
+backend/*.suo
+backend/*.userosscache
+backend/*.sln.docstates
+
+# IDE
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.sublime-workspace
+*.swp
+*.swo
+
+# System files
+.DS_Store
+Thumbs.db
+*.log
+
+# Environment files
+*.local
+.env
+.env.*
+!.env.example
+
+# Build artifacts
+*.dll
+*.exe
+*.pdb
