@@ -9,7 +9,6 @@ import {
   GetItemsRequest,
 } from './api-client.generated';
 import { environment } from '../../environments/environment';
-
 export { Item, GetItemsRequest } from './api-client.generated';
 
 export interface PagedResult<T> {

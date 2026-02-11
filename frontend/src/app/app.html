@@ -1,16 +1,19 @@
-<div class="container">
-  <h1>TCC Beverage - Item Management</h1>
+<app-toast-container></app-toast-container>
 
+<header class="top-bar">
+  <h1>TCC Beverage - Item Management</h1>
+</header>
+
+<div class="container">
   <div class="input-section">
     <div class="input-wrapper">
       <input
         type="text"
         [formControl]="serialNumberControl"
-        [class.has-error]="addError"
         placeholder="Enter Serial Number (A-Z, 0-9)"
         maxlength="18"
         (keyup.enter)="addItem()"
-        (input)="clearError()"
+        [disabled]="isAddingItem"
       />
       @if (serialNumberControl.touched && serialNumberControl.invalid) {
         <span class="error-message">
@@ -23,14 +26,18 @@
           }
         </span>
       }
-      @if (addError) {
-        <span class="error-message api-error">{{ addError }}</span>
-      }
     </div>
-    <button (click)="addItem()" [disabled]="serialNumberControl.invalid">Add Item</button>
+    <button (click)="addItem()" [disabled]="serialNumberControl.invalid || isAddingItem">
+      @if (isAddingItem) {
+        <app-spinner [size]="SpinnerSize.Small"></app-spinner>
+      } @else {
+        Add Item
+      }
+    </button>
   </div>
 
   <ag-grid-angular
+    class="grid"
     [theme]="theme"
     [columnDefs]="columnDefs"
     [context]="gridContext"
@@ -41,7 +48,6 @@
     [infiniteInitialRowCount]="infiniteInitialRowCount"
     [maxBlocksInCache]="maxBlocksInCache"
     (gridReady)="onGridReady($event)"
-    style="width: 100%; height: 500px"
   >
   </ag-grid-angular>
 </div>

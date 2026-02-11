@@ -14,22 +14,34 @@ import {
 } from 'ag-grid-community';
 import { Subscription } from 'rxjs';
 import { ItemService, GetItemsRequest } from './services/item.service';
+import { NotificationService } from './services/notification.service';
 import { columnDefs } from './columnDefs';
 import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
+import { ToastContainerComponent } from './components/toast-container/toast-container.component';
+import { SpinnerComponent, SpinnerSize } from './components/spinner/spinner.component';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [ReactiveFormsModule, AgGridModule, ConfirmDialogComponent],
+  imports: [
+    ReactiveFormsModule,
+    AgGridModule,
+    ConfirmDialogComponent,
+    ToastContainerComponent,
+    SpinnerComponent,
+  ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
 export class App implements OnInit, OnDestroy {
   private itemService = inject(ItemService);
+  private notificationService = inject(NotificationService);
   private gridApi!: GridApi;
   private refreshSubscription?: Subscription;
+
+  public SpinnerSize = SpinnerSize;
 
   public serialNumberControl = new FormControl('', [
     Validators.required,
@@ -38,7 +50,7 @@ export class App implements OnInit, OnDestroy {
     Validators.pattern(/^[A-Z0-9]+$/),
   ]);
 
-  public addError: string | null = null;
+  public isAddingItem = false;
 
   public deleteDialogVisible = false;
   public deleteDialogMessage = '';
@@ -149,26 +161,26 @@ export class App implements OnInit, OnDestroy {
       return;
     }
 
-    this.addError = null;
+    this.isAddingItem = true;
     this.itemService.addItem(this.serialNumberControl.value.trim()).subscribe({
       next: () => {
         this.serialNumberControl.setValue('');
         this.serialNumberControl.markAsUntouched();
-        this.addError = null;
+        this.notificationService.success('Item added successfully');
+        this.isAddingItem = false;
       },
       error: (err) => {
+        let message = 'Failed to add item';
         try {
           const parsed = JSON.parse(err?.response);
-          this.addError = parsed?.message || 'Failed to add item';
+          message = parsed?.message || message;
         } catch {
-          this.addError = err?.message || 'Failed to add item';
+          message = err?.message || message;
         }
+        this.notificationService.error(message);
+        this.isAddingItem = false;
       },
     });
-  }
-
-  public clearError(): void {
-    this.addError = null;
   }
 
   public showDeleteDialog(id: number, serialNumber: string): void {
@@ -180,7 +192,12 @@ export class App implements OnInit, OnDestroy {
   public onDeleteConfirmed(): void {
     if (this.pendingDeleteId !== null) {
       this.itemService.deleteItem(this.pendingDeleteId).subscribe({
-        error: (err) => console.error('Failed to delete item:', err),
+        next: () => {
+          this.notificationService.success('Item deleted successfully');
+        },
+        error: () => {
+          this.notificationService.error('Failed to delete item');
+        },
       });
     }
     this.closeDeleteDialog();

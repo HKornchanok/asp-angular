@@ -37,7 +37,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
       }
 
       .dialog {
-        background: white;
+        background: var(--color-white);
         border-radius: 8px;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         min-width: 350px;
@@ -46,12 +46,12 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 
       .dialog-header {
         padding: 16px 20px;
-        border-bottom: 1px solid #e0e0e0;
+        border-bottom: 1px solid var(--color-border-light);
 
         h3 {
           margin: 0;
           font-size: 18px;
-          color: #333;
+          color: var(--color-text);
         }
       }
 
@@ -60,14 +60,14 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 
         p {
           margin: 0;
-          color: #666;
+          color: var(--color-text-muted);
           line-height: 1.5;
         }
       }
 
       .dialog-footer {
         padding: 12px 20px;
-        border-top: 1px solid #e0e0e0;
+        border-top: 1px solid var(--color-border-light);
         display: flex;
         justify-content: flex-end;
         gap: 10px;
@@ -83,20 +83,20 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
       }
 
       .btn-cancel {
-        background-color: #e0e0e0;
-        color: #333;
+        background-color: var(--color-border-light);
+        color: var(--color-text);
 
         &:hover {
-          background-color: #d0d0d0;
+          background-color: var(--color-border);
         }
       }
 
       .btn-confirm {
-        background-color: #dc3545;
-        color: white;
+        background-color: var(--color-danger);
+        color: var(--color-white);
 
         &:hover {
-          background-color: #c82333;
+          background-color: var(--color-danger-hover);
         }
       }
     `,

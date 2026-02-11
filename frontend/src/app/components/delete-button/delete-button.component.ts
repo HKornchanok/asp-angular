@@ -9,8 +9,8 @@ import { ICellRendererParams } from 'ag-grid-community';
   styles: [
     `
       .delete-btn {
-        background-color: #dc3545;
-        color: white;
+        background-color: var(--color-danger);
+        color: var(--color-white);
         border: none;
         padding: 5px 12px;
         border-radius: 4px;
@@ -18,7 +18,7 @@ import { ICellRendererParams } from 'ag-grid-community';
         font-size: 12px;
       }
       .delete-btn:hover {
-        background-color: #c82333;
+        background-color: var(--color-danger-hover);
       }
     `,
   ],
