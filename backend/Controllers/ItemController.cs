@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Backend.Data;
 using Backend.DTOs;
+using Backend.Helpers;
 using Backend.Hubs;
 using Backend.Models;
 
@@ -25,6 +26,9 @@ public class ItemController : ControllerBase
     [HttpPost("search")]
     public async Task<ActionResult<PagedResultDto<Item>>> SearchItems([FromBody] GetItemsRequest request)
     {
+        var filterSerialNumber = InputSanitizer.StripHtml(request.FilterSerialNumber);
+        var filterBarcode = InputSanitizer.StripHtml(request.FilterBarcode);
+
         var query = _context.Items.AsQueryable();
 
         if (request.FilterId.HasValue)
@@ -40,9 +44,9 @@ public class ItemController : ControllerBase
             };
         }
 
-        if (!string.IsNullOrEmpty(request.FilterSerialNumber))
+        if (!string.IsNullOrEmpty(filterSerialNumber))
         {
-            var snLower = request.FilterSerialNumber.ToLower();
+            var snLower = filterSerialNumber.ToLower();
             query = (request.FilterSerialNumberType?.ToLower()) switch
             {
                 "equals" => query.Where(i => i.SerialNumber.ToLower() == snLower),
@@ -54,9 +58,9 @@ public class ItemController : ControllerBase
             };
         }
 
-        if (!string.IsNullOrEmpty(request.FilterBarcode))
+        if (!string.IsNullOrEmpty(filterBarcode))
         {
-            var barcodeLower = request.FilterBarcode.ToLower();
+            var barcodeLower = filterBarcode.ToLower();
             query = (request.FilterBarcodeType?.ToLower()) switch
             {
                 "equals" => query.Where(i => i.Barcode.ToLower() == barcodeLower),
@@ -198,9 +202,10 @@ public class ItemController : ControllerBase
     {
         var query = _context.Items.IgnoreQueryFilters().Where(i => i.DeletedAt != null);
 
-        if (!string.IsNullOrEmpty(request.FilterSerialNumber))
+        var filterSerialNumber = InputSanitizer.StripHtml(request.FilterSerialNumber);
+        if (!string.IsNullOrEmpty(filterSerialNumber))
         {
-            var snLower = request.FilterSerialNumber.ToLower();
+            var snLower = filterSerialNumber.ToLower();
             query = query.Where(i => i.SerialNumber.ToLower().Contains(snLower));
         }
 
