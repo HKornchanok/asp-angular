@@ -92,6 +92,20 @@ try
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.EnsureCreated();
+
+    await db.Database.ExecuteSqlRawAsync(@"
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_name = 'items' AND column_name = 'deleted_at'
+            ) THEN
+                ALTER TABLE items ADD COLUMN deleted_at TIMESTAMP;
+                CREATE INDEX IF NOT EXISTS ix_items_deleted_at ON items (deleted_at);
+            END IF;
+        END $$;
+    ");
+
     Console.WriteLine("Database connected successfully.");
 }
 catch (Exception ex)
