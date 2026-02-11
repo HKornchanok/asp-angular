@@ -132,7 +132,7 @@ public class ItemControllerTests
     }
 
     [Fact]
-    public async Task DeleteItem_ExistingId_ReturnsNoContent()
+    public async Task DeleteItem_ExistingId_SoftDeletes()
     {
         var context = CreateContext();
         var mockHub = CreateMockHubContext();
@@ -145,7 +145,10 @@ public class ItemControllerTests
         var result = await controller.DeleteItem(item.Id);
 
         Assert.IsType<NoContentResult>(result);
-        Assert.Null(await context.Items.FindAsync(item.Id));
+        
+        var deletedItem = await context.Items.IgnoreQueryFilters().FirstOrDefaultAsync(i => i.Id == item.Id);
+        Assert.NotNull(deletedItem);
+        Assert.NotNull(deletedItem.DeletedAt);
     }
 
     [Fact]
@@ -158,6 +161,43 @@ public class ItemControllerTests
         var result = await controller.DeleteItem(999);
 
         Assert.IsType<NotFoundResult>(result);
+    }
+
+    [Fact]
+    public async Task RestoreItem_DeletedItem_RestoresSuccessfully()
+    {
+        var context = CreateContext();
+        var mockHub = CreateMockHubContext();
+        var controller = new ItemController(context, mockHub.Object);
+
+        var item = new Item { SerialNumber = "ABCD1234567890EF12", Barcode = "ABCD1234567890EF12", DeletedAt = DateTime.UtcNow };
+        context.Items.Add(item);
+        await context.SaveChangesAsync();
+
+        var result = await controller.RestoreItem(item.Id);
+
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var restoredItem = Assert.IsType<Item>(okResult.Value);
+        Assert.Null(restoredItem.DeletedAt);
+    }
+
+    [Fact]
+    public async Task SearchDeletedItems_ReturnsOnlyDeletedItems()
+    {
+        var context = CreateContext();
+        var mockHub = CreateMockHubContext();
+        var controller = new ItemController(context, mockHub.Object);
+
+        context.Items.Add(new Item { SerialNumber = "ACTIVE0000000001", Barcode = "ACTIVE0000000001" });
+        context.Items.Add(new Item { SerialNumber = "DELETED000000001", Barcode = "DELETED000000001", DeletedAt = DateTime.UtcNow });
+        await context.SaveChangesAsync();
+
+        var request = new GetItemsRequest { Skip = 0, Take = 10 };
+        var result = await controller.SearchDeletedItems(request);
+
+        var pagedResult = Assert.IsType<PagedResultDto<Item>>(result.Value);
+        Assert.Equal(1, pagedResult.TotalCount);
+        Assert.All(pagedResult.Items, item => Assert.NotNull(item.DeletedAt));
     }
 
     [Fact]
@@ -183,5 +223,24 @@ public class ItemControllerTests
         var pagedResult = Assert.IsType<PagedResultDto<Item>>(result.Value);
         Assert.Equal(5, pagedResult.TotalCount);
         Assert.Equal(5, pagedResult.Items.Count);
+    }
+
+    [Fact]
+    public async Task RestoreItem_SerialNumberInUse_ReturnsConflict()
+    {
+        var context = CreateContext();
+        var mockHub = CreateMockHubContext();
+        var controller = new ItemController(context, mockHub.Object);
+
+        // Add a soft-deleted item
+        var deletedItem = new Item { SerialNumber = "ABCD1234567890EF12", Barcode = "ABCD1234567890EF12", DeletedAt = DateTime.UtcNow };
+        context.Items.Add(deletedItem);
+        // Add an active item with the same serial number
+        context.Items.Add(new Item { SerialNumber = "ABCD1234567890EF12", Barcode = "ABCD1234567890EF12" });
+        await context.SaveChangesAsync();
+
+        var result = await controller.RestoreItem(deletedItem.Id);
+
+        Assert.IsType<ConflictObjectResult>(result.Result);
     }
 }

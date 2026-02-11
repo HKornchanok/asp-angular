@@ -26,6 +26,9 @@ public class AppDbContext : DbContext
             entity.HasIndex(e => e.SerialNumber).IsUnique();
             entity.HasIndex(e => e.Barcode);
             entity.HasIndex(e => e.CreatedAt);
+            entity.HasIndex(e => e.DeletedAt);
+
+            entity.HasQueryFilter(e => e.DeletedAt == null);
         });
     }
 }

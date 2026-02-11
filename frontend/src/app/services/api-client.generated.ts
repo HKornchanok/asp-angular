@@ -19,6 +19,8 @@ export interface IApiClient {
     getItem(id: number): Observable<Item>;
     deleteItem(id: number): Observable<FileResponse>;
     createItem(dto: CreateItemDto): Observable<Item>;
+    restoreItem(id: number): Observable<Item>;
+    searchDeletedItems(request: GetItemsRequest): Observable<PagedResultDtoOfItem>;
 }
 
 @Injectable({
@@ -243,6 +245,109 @@ export class ApiClient implements IApiClient {
         }
         return _observableOf(null as any);
     }
+
+    restoreItem(id: number): Observable<Item> {
+        let url_ = this.baseUrl + "/api/Item/{id}/restore";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processRestoreItem(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processRestoreItem(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<Item>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<Item>;
+        }));
+    }
+
+    protected processRestoreItem(response: HttpResponseBase): Observable<Item> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = Item.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    searchDeletedItems(request: GetItemsRequest): Observable<PagedResultDtoOfItem> {
+        let url_ = this.baseUrl + "/api/Item/deleted/search";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(request);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processSearchDeletedItems(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processSearchDeletedItems(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<PagedResultDtoOfItem>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<PagedResultDtoOfItem>;
+        }));
+    }
+
+    protected processSearchDeletedItems(response: HttpResponseBase): Observable<PagedResultDtoOfItem> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = PagedResultDtoOfItem.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
 }
 
 export class PagedResultDtoOfItem implements IPagedResultDtoOfItem {
@@ -301,6 +406,7 @@ export class Item implements IItem {
     serialNumber!: string;
     barcode!: string;
     createdAt?: Date;
+    deletedAt?: Date | null;
 
     constructor(data?: IItem) {
         if (data) {
@@ -317,6 +423,7 @@ export class Item implements IItem {
             this.serialNumber = _data["serialNumber"] !== undefined ? _data["serialNumber"] : null as any;
             this.barcode = _data["barcode"] !== undefined ? _data["barcode"] : null as any;
             this.createdAt = _data["createdAt"] ? new Date(_data["createdAt"].toString()) : null as any;
+            this.deletedAt = _data["deletedAt"] ? new Date(_data["deletedAt"].toString()) : null as any;
         }
     }
 
@@ -333,6 +440,7 @@ export class Item implements IItem {
         data["serialNumber"] = this.serialNumber !== undefined ? this.serialNumber : null as any;
         data["barcode"] = this.barcode !== undefined ? this.barcode : null as any;
         data["createdAt"] = this.createdAt ? this.createdAt.toISOString() : null as any;
+        data["deletedAt"] = this.deletedAt ? this.deletedAt.toISOString() : null as any;
         return data;
     }
 }
@@ -342,6 +450,7 @@ export interface IItem {
     serialNumber: string;
     barcode: string;
     createdAt?: Date;
+    deletedAt?: Date | null;
 }
 
 export class GetItemsRequest implements IGetItemsRequest {

@@ -158,11 +158,62 @@ public class ItemController : ControllerBase
             return NotFound();
         }
 
-        _context.Items.Remove(item);
+        item.DeletedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
 
         await _hubContext.Clients.All.SendAsync("ItemDeleted", id);
 
         return NoContent();
+    }
+
+    [HttpPost("{id}/restore")]
+    [EnableRateLimiting("strict")]
+    public async Task<ActionResult<Item>> RestoreItem(int id)
+    {
+        var item = await _context.Items
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(i => i.Id == id && i.DeletedAt != null);
+
+        if (item == null)
+        {
+            return NotFound();
+        }
+
+        var exists = await _context.Items.AnyAsync(i => i.SerialNumber == item.SerialNumber);
+        if (exists)
+        {
+            return Conflict(new { message = "Cannot restore: serial number is already in use" });
+        }
+
+        item.DeletedAt = null;
+        await _context.SaveChangesAsync();
+
+        await _hubContext.Clients.All.SendAsync("ItemRestored", item);
+
+        return Ok(item);
+    }
+
+    [HttpPost("deleted/search")]
+    public async Task<ActionResult<PagedResultDto<Item>>> SearchDeletedItems([FromBody] GetItemsRequest request)
+    {
+        var query = _context.Items.IgnoreQueryFilters().Where(i => i.DeletedAt != null);
+
+        if (!string.IsNullOrEmpty(request.FilterSerialNumber))
+        {
+            var snLower = request.FilterSerialNumber.ToLower();
+            query = query.Where(i => i.SerialNumber.ToLower().Contains(snLower));
+        }
+
+        var totalCount = await query.CountAsync();
+
+        query = query.OrderByDescending(i => i.DeletedAt);
+
+        var items = await query.Skip(request.Skip).Take(request.Take).ToListAsync();
+
+        return new PagedResultDto<Item>
+        {
+            Items = items,
+            TotalCount = totalCount
+        };
     }
 }
