@@ -78,3 +78,9 @@ npm run test:coverage    # Run tests with coverage report
 ```bash
 dotnet test backend.Tests
 ```
+
+## CI/CD
+
+- Backend: Build and test
+- Frontend: Lint, test, and build
+- Docker: Build images
